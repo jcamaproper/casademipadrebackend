@@ -8,18 +8,38 @@ import uuid
 if __name__ == '__main__':
     from mocks import respuestas_mocks
 
-from bucket_audio_files import upload_audio_to_bucket
+from casa_de_mi_padre.app.upload_file_to_bucket import upload_file_to_bucket
 import os
 
 
 app = Flask(__name__)
 api = Api(app)
 
-# Retorna el contenido del archivo
 class Devocional(Resource):
-    def get(self):
-        resp = analizar_documento(r'casa_de_mi_padre/app/template4.docx')
-        return jsonify(resp)
+    def post(self):
+        try:
+            # Get the file from the request
+            docx_file = request.files['file']
+
+            if docx_file:
+                # Upload the file to the bucket
+                file_url = upload_file_to_bucket(docx_file, 'casademipadrebucket','podcast_bucket_casa_de_mi_padre')
+
+                # Analyze the document from the bucket
+                # If your analizar_documento function requires a local file path,
+                # you may need to download the file from file_url before analysis.
+                # Otherwise, if it can work with a URL, you can pass file_url directly.
+                analysis_result = analizar_documento(file_url)
+
+                # Return the analysis result and the file URL
+                return jsonify({
+                    'analysis_result': analysis_result,
+                    'file_url': file_url
+                })
+            else:
+                return {'message': 'No file provided'}, 400
+        except Exception as e:
+            return {'message': 'An error occurred', 'error': str(e)}, 500
     
 class Devocionales(Resource):
     def get(self):
@@ -90,7 +110,7 @@ class AudioUploadResource(Resource):
 
             if audio_file:
                 # Upload the audio file to Google Cloud Storage
-                file_url = upload_audio_to_bucket(audio_file,'casademipadredevo')
+                file_url = upload_file_to_bucket(audio_file,'casademipadredevo','podcast_bucket_casa_de_mi_padre')
 
                 # Optionally, save the URL to your PostgreSQL database here
 

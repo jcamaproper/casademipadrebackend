@@ -1,4 +1,5 @@
 from docx import Document
+import requests
 from unidecode import unidecode
 from app.insert_data import insertar_datos
 #from firebase import send_push_notifications
@@ -11,9 +12,20 @@ from db.dbManager import get_db_cursor
 
 # Load environment variables from .env file
 
-def analizar_documento(doc_path):
+def analizar_documento(file_url):
     # Abre el documento de Word
-    doc = Document(doc_path)
+    with requests.get(file_url, stream=True) as response:
+        response.raise_for_status()  # This will raise an exception for HTTP errors
+
+        # Create a temporary file
+        temp_path = '/tmp/temp_document.docx'  # Adjust the path as needed
+
+        # Stream the content to a file
+        with open(temp_path, 'wb') as file:
+            for chunk in response.iter_content(chunk_size=8192): 
+                file.write(chunk)
+
+    doc = Document(temp_path)
     map = {}
     parrafos = []
     # Se eliminan los espacios en blanco para no tener problemas con los saltos de línea
@@ -113,7 +125,7 @@ def analizar_documento(doc_path):
 
     #Despues de insertar los datos, se debe enviar una notificacion a los usuarios
     #send_push_notifications()
-
+    os.remove(temp_path)
     return map
 
 
