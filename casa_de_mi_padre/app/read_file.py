@@ -11,7 +11,6 @@ from casa_de_mi_padre.db.dbManager import get_db_cursor
 
 # Load environment variables from .env file
 
-
 def analizar_documento(doc_path):
     # Abre el documento de Word
     doc = Document(doc_path)
@@ -150,22 +149,22 @@ def extract_questions_to_map(text):
     return questions_map
 
 # Reemplaza 'ruta_del_documento.docx' con la ruta de tu propio documento de Word
-ruta_del_documento = 'template4.docx'
-if __name__ == "__main__":
-    analizar_documento(ruta_del_documento)
+# ruta_del_documento = 'template4.docx'
+# if __name__ == "__main__":
+#     analizar_documento(ruta_del_documento)
 
-def obtener_devocionales(offset=0, limite=10):
-    # Conexión a la base de datos
-    with get_db_cursor() as cur:
-        cur.execute("""
-            SELECT * FROM devocionales
-            ORDER BY fecha DESC
-            OFFSET %s LIMIT %s
-        """, (offset, limite))
-        registros = cur.fetchall()
-        columnas = [desc[0] for desc in cur.description]
-        devocionales = []
-        for registro in registros:
-            devocionales.append(dict(zip(columnas, registro)))
-    return devocionales
+# def obtener_devocionales(offset=0, limite=10):
+#     # Conexión a la base de datos
+#     with get_db_cursor() as cur:
+#         cur.execute("""
+#             SELECT * FROM devocionales
+#             ORDER BY fecha DESC
+#             OFFSET %s LIMIT %s
+#         """, (offset, limite))
+#         registros = cur.fetchall()
+#         columnas = [desc[0] for desc in cur.description]
+#         devocionales = []
+#         for registro in registros:
+#             devocionales.append(dict(zip(columnas, registro)))
+#     return devocionales
 

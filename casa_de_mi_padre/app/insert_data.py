@@ -9,8 +9,7 @@ from casa_de_mi_padre.db.dbManager import get_db_cursor
 def insertar_datos(map):
  with get_db_cursor() as cur:
     map['fecha'] = datetime.now().date()
-    map['trivia'] = json.dumps(map['trivia'])
-
+    
     query = sql.SQL("""
         INSERT INTO devocionales (semana, 
          titulo_video,
@@ -27,8 +26,7 @@ def insertar_datos(map):
          capitulo, 
          lectura, 
          biografia,
-         fecha,
-         trivia) 
+         fecha) 
         VALUES (%(semana)s,
           %(titulo_video)s,
           %(video_link)s, 
@@ -44,11 +42,39 @@ def insertar_datos(map):
           %(capitulo)s, 
           %(lectura)s, 
           %(biografia)s,
-          %(fecha)s,
-          %(trivia)s
-          )
+          %(fecha)s
+          ) RETURNING id
     """)
+
     cur.execute(query, map)
+
+    map['trivia'] = json.dumps(map['trivia'])
+
+    # Después de cur.execute(query, map)
+    devocional_id = cur.fetchone()[0]
+
+    map['devocional_id'] = devocional_id
+
+    # Luego, insertar la trivia usando el devocional_id
+    trivia_query = sql.SQL("""
+    INSERT INTO trivia (devocional_id, trivia, fecha) 
+    VALUES (%(devocional_id)s, %(trivia)s, %(fecha)s)
+    RETURNING id
+    """)
+
+    cur.execute(trivia_query, map)
+
+    trivia_id = cur.fetchone()[0]
+
+    map['trivia_id'] = trivia_id
+
+    # Luego, insertar el id de la trivia en la tabla devocionales
+    devocional_trivia_query = sql.SQL("""
+    UPDATE devocionales
+    SET trivia_id = %(trivia_id)s
+    WHERE id = %(devocional_id)s
+    """)
+    cur.execute(devocional_trivia_query, map)
 
 
 def generate_unique_uuid(conn):
