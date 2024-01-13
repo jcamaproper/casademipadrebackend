@@ -11,6 +11,9 @@ def upload_file_to_bucket(file, project_id, bucket_name):
     blob = bucket.blob(file.filename)
     blob.upload_from_string(file.read(), content_type=file.content_type)
 
+    # Make the blob publicly accessible
+    blob.make_public()
+
     # Get the URL of the uploaded file
     file_url = blob.public_url
 

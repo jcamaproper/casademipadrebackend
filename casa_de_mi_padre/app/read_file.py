@@ -3,16 +3,14 @@ import requests
 from unidecode import unidecode
 from app.insert_data import insertar_datos
 #from firebase import send_push_notifications
-import psycopg2
 import json
 import os
-from dotenv import load_dotenv
 import json
-from db.dbManager import get_db_cursor
+
 
 # Load environment variables from .env file
 
-def analizar_documento(file_url):
+def analizar_documento(file_url, podcast_url):
     # Abre el documento de Word
     with requests.get(file_url, stream=True) as response:
         response.raise_for_status()  # This will raise an exception for HTTP errors
@@ -120,6 +118,8 @@ def analizar_documento(file_url):
     #json_sin_acentos = quitar_acentos_en_json(json_acentos)
     #print(json_sin_acentos)
     #print(map)
+
+    map["podcast"] = podcast_url
 
     insertar_datos(map)
 
