@@ -1,8 +1,8 @@
 from flask import Flask, jsonify, request
 from flask_restful import Resource, Api
-from casa_de_mi_padre.db.dbManager import get_db_cursor
-from casa_de_mi_padre.app.read_file import analizar_documento
-from casa_de_mi_padre.app.search import obtener_devocionales, obtener_trivias, obtener_podcasts, obtener_podcast_por_uuid, obtener_trivia_por_uuid, obtener_devocional_por_uuid
+from db.dbManager import get_db_cursor
+from app.read_file import analizar_documento
+from app.search import obtener_devocionales, obtener_trivias, obtener_podcasts, obtener_podcast_por_uuid, obtener_trivia_por_uuid, obtener_devocional_por_uuid
 import uuid
 
 if __name__ == '__main__':

@@ -3,7 +3,7 @@ from psycopg2 import sql
 from datetime import datetime
 import os
 import uuid  # If you need UUID generation
-from casa_de_mi_padre.db.dbManager import get_db_cursor
+from db.dbManager import get_db_cursor
 
 
 def insertar_datos(map):

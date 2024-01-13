@@ -6,7 +6,7 @@ import psycopg2
 from psycopg2.extras import register_uuid
 import os
 from dotenv import load_dotenv
-from casa_de_mi_padre.db.dbManager import get_db_cursor
+from db.dbManager import get_db_cursor
 
 # Obtiene los devocionales de la base de datos
 # filters: columna por la que se va a filtrar

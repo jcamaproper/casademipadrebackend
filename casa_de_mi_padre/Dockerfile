@@ -2,20 +2,24 @@
 FROM python:3.12
 
 # Set the working directory in the container
-WORKDIR /app
+WORKDIR /casa_de_mi_padre
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+# Set the PYTHONPATH environment variable
+ENV PYTHONPATH /casa_de_mi_padre
+
+# Copy the current directory contents into the container at /casa_de_mi_padre
+COPY . /casa_de_mi_padre
 
 # Install any needed packages specified in requirements.txt
-RUN pip install --trusted-host pypi.python.org -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Make port 80 available to the world outside this container
 EXPOSE 80
 
 # Set environment variables from .env file
 ARG ENV_FILE=.env
-ENV $(cat $ENV_FILE | xargs)
+ENV ENV_FILE_PATH=/casa_de_mi_padre/$ENV_FILE
+RUN if [ -f "$ENV_FILE_PATH" ]; then export $(cat $ENV_FILE_PATH | xargs); fi
 
 # Run app.py when the container launches
-CMD ["python", "app.py"]
+CMD ["python", "app/main.py"]

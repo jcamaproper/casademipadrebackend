@@ -1,13 +1,13 @@
 from docx import Document
 from unidecode import unidecode
-from casa_de_mi_padre.app.insert_data import insertar_datos
+from app.insert_data import insertar_datos
 #from firebase import send_push_notifications
 import psycopg2
 import json
 import os
 from dotenv import load_dotenv
 import json
-from casa_de_mi_padre.db.dbManager import get_db_cursor
+from db.dbManager import get_db_cursor
 
 # Load environment variables from .env file
 
