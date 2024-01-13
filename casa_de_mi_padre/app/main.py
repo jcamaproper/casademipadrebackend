@@ -1,6 +1,5 @@
 from flask import Flask, jsonify, request
 from flask_restful import Resource, Api
-from db.dbManager import get_db_cursor
 from app.read_file import analizar_documento
 from app.search import obtener_devocionales, obtener_trivias, obtener_podcasts, obtener_podcast_por_uuid, obtener_trivia_por_uuid, obtener_devocional_por_uuid
 import uuid
@@ -20,21 +19,24 @@ class Devocional(Resource):
         try:
             # Get the file from the request
             docx_file = request.files['file']
+            audio_file = request.files['podcast']
 
             if docx_file:
                 # Upload the file to the bucket
-                file_url = upload_file_to_bucket(docx_file, 'casademipadrebucket','podcast_bucket_casa_de_mi_padre')
+                file_url = upload_file_to_bucket(docx_file, 'casademipadrebucket','devotional_bucket_casa_de_mi_padre')
+                podcast_url = upload_file_to_bucket(audio_file, 'casademipadrebucket','podcast_bucket_casa_de_mi_padre')
 
                 # Analyze the document from the bucket
                 # If your analizar_documento function requires a local file path,
                 # you may need to download the file from file_url before analysis.
                 # Otherwise, if it can work with a URL, you can pass file_url directly.
-                analysis_result = analizar_documento(file_url)
+                analysis_result = analizar_documento(file_url, podcast_url)
 
                 # Return the analysis result and the file URL
                 return jsonify({
                     'analysis_result': analysis_result,
-                    'file_url': file_url
+                    'file_url': file_url,
+                    'podcast_url': podcast_url,
                 })
             else:
                 return {'message': 'No file provided'}, 400

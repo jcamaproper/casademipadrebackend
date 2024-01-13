@@ -1,7 +1,6 @@
 import json
 from psycopg2 import sql
 from datetime import datetime
-import os
 import uuid  # If you need UUID generation
 from db.dbManager import get_db_cursor
 
@@ -76,6 +75,25 @@ def insertar_datos(map):
     """)
     cur.execute(devocional_trivia_query, map)
 
+    # Luego, insertar la trivia usando el devocional_id
+    podcast_query = sql.SQL("""
+    INSERT INTO podcast (devocional_id, podcast, fecha) 
+    VALUES (%(devocional_id)s, %(podcast)s, %(fecha)s)
+    RETURNING id
+    """)
+    cur.execute(podcast_query, map)
+
+    podcast_id = cur.fetchone()[0]
+
+    map['podcast_id'] = podcast_id
+
+    # Luego, insertar el id del podcast en la tabla devocionales
+    devocional_podcast_query = sql.SQL("""
+    UPDATE devocionales
+    SET podcast_id = %(podcast_id)s
+    WHERE id = %(devocional_id)s
+    """)
+    cur.execute(devocional_podcast_query, map)
 
 def generate_unique_uuid(conn):
     while True:

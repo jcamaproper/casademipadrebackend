@@ -2,9 +2,7 @@ from docx import Document
 from unidecode import unidecode
 from insert_data import insertar_datos
 #from firebase import send_push_notifications
-import psycopg2
 from psycopg2.extras import register_uuid
-import os
 from dotenv import load_dotenv
 from db.dbManager import get_db_cursor
 
