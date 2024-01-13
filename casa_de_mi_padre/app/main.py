@@ -23,8 +23,8 @@ class Devocional(Resource):
 
             if docx_file:
                 # Upload the file to the bucket
-                file_url = upload_file_to_bucket(docx_file, 'casademipadrebucket','devotional_bucket_casa_de_mi_padre')
-                podcast_url = upload_file_to_bucket(audio_file, 'casademipadrebucket','podcast_bucket_casa_de_mi_padre')
+                file_url = upload_file_to_bucket(docx_file, 'casademipadredev','devotional_bucket_casa_de_mi_padre')
+                podcast_url = upload_file_to_bucket(audio_file, 'casademipadredevo','podcast_bucket_casa_de_mi_padre')
 
                 # Analyze the document from the bucket
                 # If your analizar_documento function requires a local file path,
@@ -136,8 +136,8 @@ api.add_resource(DevocionalById, '/devocional/<string:devocional_id>')
 
 def run_app():
     # Set port to 10000 for Render, default to 5000 for local development
-    port = int(os.environ.get('PORT', 10000))
-    app.run(host='0.0.0.0', port=port, debug=False)
+    port = int(os.environ.get('PORT', 5001))
+    app.run(host='0.0.0.0', port=port, debug=True)
 
 if __name__ == '__main__':
     run_app()
