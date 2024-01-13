@@ -77,7 +77,7 @@ def insertar_datos(map):
 
     # Luego, insertar la trivia usando el devocional_id
     podcast_query = sql.SQL("""
-    INSERT INTO podcast (devocional_id, podcast, fecha) 
+    INSERT INTO podcast (devocional_id, podcast_uri, fecha) 
     VALUES (%(devocional_id)s, %(podcast)s, %(fecha)s)
     RETURNING id
     """)
