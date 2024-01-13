@@ -1,0 +1,50 @@
+# .render.yaml
+
+# Environment variables that your application needs
+env:
+  - key: PGUSER
+    from: secret
+    name: PGUSER
+  - key: PGPASSWORD
+    from: secret
+    name: PGPASSWORD
+  - key: PGHOST
+    from: secret
+    name: PGHOST
+  - key: PGPORT
+    from: secret
+    name: PGPORT
+  - key: PGDATABASE
+    from: secret
+    name: PGDATABASE
+
+# Build settings for your application
+build:
+  # The Dockerfile to use for building the image
+  dockerfile: Dockerfile
+  # The context for building the Docker image (path to your project root)
+  context: .
+
+# Web service settings
+services:
+  - name: flask-app
+    # The Docker image to use (replace with your Docker image URL)
+    image: registry.render.com/user/repo:tag
+    env: secret
+    envVars:
+      - PGUSER
+      - PGPASSWORD
+      - PGHOST
+      - PGPORT
+      - PGDATABASE
+    # Ports to expose
+    ports:
+      - 80:8080  # Map port 80 on Render to port 8080 in your container
+
+# Auto-deploy settings
+autodeploy:
+  - name: flask-app
+    # The branch to auto-deploy from (e.g., main or master)
+    branch: main
+    # The build command (use the same command you would use to run your app)
+    buildCommand: python app.py
