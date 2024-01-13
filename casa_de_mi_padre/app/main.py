@@ -8,7 +8,7 @@ import uuid
 if __name__ == '__main__':
     from mocks import respuestas_mocks
 
-from casa_de_mi_padre.app.upload_file_to_bucket import upload_file_to_bucket
+from upload_file_to_bucket import upload_file_to_bucket
 import os
 
 
