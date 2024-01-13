@@ -1,20 +1,16 @@
 from docx import Document
 from unidecode import unidecode
-from insert import insertar_datos
+from casa_de_mi_padre.app.insert_data import insertar_datos
 #from firebase import send_push_notifications
+import psycopg2
 import json
 import os
 from dotenv import load_dotenv
+import json
+from casa_de_mi_padre.db.dbManager import get_db_cursor
 
 # Load environment variables from .env file
-load_dotenv()
 
-# Get PostgreSQL connection details from environment variables
-PG_USER = os.getenv("PGUSER")
-PG_PASSWORD = os.getenv("PGPASSWORD")
-PG_HOST = os.getenv("PGHOST")
-PG_PORT = os.getenv("PGPORT")
-PG_DATABASE = os.getenv("PGDATABASE")
 
 def analizar_documento(doc_path):
     # Abre el documento de Word
@@ -133,7 +129,7 @@ def quitar_acentos_en_json(json_data):
             data_dict[key] = quitar_acentos(value)
     return json.dumps(data_dict, indent=4)
 
-import json
+
 
 def extract_questions_to_map(text):
     lines = text.strip().split('\n')
@@ -154,5 +150,22 @@ def extract_questions_to_map(text):
     return questions_map
 
 # Reemplaza 'ruta_del_documento.docx' con la ruta de tu propio documento de Word
-#ruta_del_documento = 'template4.docx'
-#analizar_documento(ruta_del_documento)
+ruta_del_documento = 'template4.docx'
+if __name__ == "__main__":
+    analizar_documento(ruta_del_documento)
+
+def obtener_devocionales(offset=0, limite=10):
+    # Conexión a la base de datos
+    with get_db_cursor() as cur:
+        cur.execute("""
+            SELECT * FROM devocionales
+            ORDER BY fecha DESC
+            OFFSET %s LIMIT %s
+        """, (offset, limite))
+        registros = cur.fetchall()
+        columnas = [desc[0] for desc in cur.description]
+        devocionales = []
+        for registro in registros:
+            devocionales.append(dict(zip(columnas, registro)))
+    return devocionales
+
