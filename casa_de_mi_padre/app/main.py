@@ -136,8 +136,9 @@ api.add_resource(DevocionalById, '/devocional/<string:devocional_id>')
 
 def run_app():
     # Set port to 10000 for Render, default to 5000 for local development
-    port = int(os.environ.get('PORT', 5001))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host='0.0.0.0', port=port, debug=False)
 
-if __name__ == '__main__':
+if __name__ == '_main_':
     run_app()
+ 

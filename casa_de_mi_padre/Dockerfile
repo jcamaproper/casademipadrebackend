@@ -16,8 +16,8 @@ COPY . /casa_de_mi_padre
 # Install any needed packages specified in requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Make port 5001 available to the world outside this container
-EXPOSE 5001
+# Make port 10000 available to the world outside this container
+EXPOSE 10000
 
 # Set environment variables from .env file
 ARG ENV_FILE=.env
