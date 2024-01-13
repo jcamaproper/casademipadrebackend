@@ -14,7 +14,7 @@ COPY . /casa_de_mi_padre
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Make port 80 available to the world outside this container
-EXPOSE 80
+EXPOSE 10000
 
 # Set environment variables from .env file
 ARG ENV_FILE=.env

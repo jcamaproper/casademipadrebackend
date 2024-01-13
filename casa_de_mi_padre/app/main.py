@@ -112,5 +112,10 @@ api.add_resource(PodcastById, '/podcast/<string:podcast_id>')
 api.add_resource(TriviaById, '/trivia/<string:trivia_id>')
 api.add_resource(DevocionalById, '/devocional/<string:devocional_id>')
 
+def run_app():
+    # Set port to 10000 for Render, default to 5000 for local development
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host='0.0.0.0', port=port, debug=False)
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    run_app()
