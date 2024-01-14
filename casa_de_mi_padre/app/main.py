@@ -45,10 +45,14 @@ class Devocional(Resource):
     
 class Devocionales(Resource):
     def get(self):
-        page = request.args.get('page', default=0, type=int)
+        page = request.args.get('page', default=1, type=int)  # Set default page to 1
         per_page = request.args.get('per_page', default=10, type=int)
+        # Ensure page is at least 1
+        page = max(page, 1)
         filters = {key: value for key, value in request.args.items() if key not in ['page', 'per_page']}
-        resp = obtener_devocionales(filters, (page - 1) * per_page, per_page)
+        # Calculate the offset ensuring it's never negative
+        offset = (page - 1) * per_page
+        resp = obtener_devocionales(filters, offset, per_page)
         return jsonify(resp)
 
 # Retorna los datos de prueba (52 semanas)
