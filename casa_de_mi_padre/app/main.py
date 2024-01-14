@@ -112,7 +112,7 @@ class AudioUploadResource(Resource):
 
             if audio_file:
                 # Upload the audio file to Google Cloud Storage
-                file_url = upload_file_to_bucket(audio_file,'casademipadredevo','podcast_bucket_casa_de_mi_padre')
+                file_url = upload_file_to_bucket(audio_file,'casademipadre','casademipadre_bucket_podcast')
 
                 # Optionally, save the URL to your PostgreSQL database here
 
