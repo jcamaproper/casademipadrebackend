@@ -23,7 +23,7 @@ class Devocional(Resource):
 
             if docx_file:
                 # Upload the file to the bucket
-                file_url = upload_file_to_bucket(docx_file, 'casademipadre','devotional_bucket_casa_de_mi_padre')
+                file_url = upload_file_to_bucket(docx_file, 'casademipadre','casademipadre_bucket_devocional')
                 podcast_url = upload_file_to_bucket(audio_file, 'casademipadre','casademipadre_bucket_podcast')
 
                 # Analyze the document from the bucket
