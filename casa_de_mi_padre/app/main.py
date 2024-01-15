@@ -3,6 +3,7 @@ from flask_restful import Resource, Api
 from app.read_file import analizar_documento
 from app.search import obtener_devocionales, obtener_trivias, obtener_podcasts, obtener_podcast_por_uuid, obtener_trivia_por_uuid, obtener_devocional_por_uuid
 import uuid
+from flask_cors import CORS
 
 if __name__ == '__main__':
     from mocks import respuestas_mocks
@@ -12,6 +13,7 @@ import os
 
 
 app = Flask(__name__)
+CORS(app)
 api = Api(app)
 
 class Devocional(Resource):
