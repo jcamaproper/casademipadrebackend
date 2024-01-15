@@ -56,8 +56,8 @@ def insertar_datos(map):
 
     # Luego, insertar la trivia usando el devocional_id
     trivia_query = sql.SQL("""
-    INSERT INTO trivia (devocional_id, trivia, fecha) 
-    VALUES (%(devocional_id)s, %(trivia)s, %(fecha)s)
+    INSERT INTO trivia (devocional_id, trivia, fecha, semana) 
+    VALUES (%(devocional_id)s, %(trivia)s, %(fecha)s, %(semana)s)
     RETURNING id
     """)
 
@@ -77,8 +77,8 @@ def insertar_datos(map):
 
     # Luego, insertar la trivia usando el devocional_id
     podcast_query = sql.SQL("""
-    INSERT INTO podcast (devocional_id, podcast_uri, fecha) 
-    VALUES (%(devocional_id)s, %(podcast)s, %(fecha)s)
+    INSERT INTO podcast (devocional_id, podcast_uri, fecha, tema, descripcion) 
+    VALUES (%(devocional_id)s, %(podcast)s, %(fecha)s, %(tema)s, %(descripcion_audio)s)
     RETURNING id
     """)
     cur.execute(podcast_query, map)

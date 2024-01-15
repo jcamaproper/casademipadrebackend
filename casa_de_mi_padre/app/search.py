@@ -10,29 +10,51 @@ from db.dbManager import get_db_cursor
 # filters: columna por la que se va a filtrar
 def obtener_devocionales(filters, offset=0, limite=10):
     with get_db_cursor() as cur:
-        query = "SELECT * FROM devocionales"
+        # Base de la consulta
+        base_query = "SELECT * FROM devocionales"
+        count_query = "SELECT COUNT(*) FROM devocionales"
 
+        # Construir cláusulas WHERE para filtrar
         where_clauses = []
         params = []
         for key, value in filters.items():
             where_clauses.append(f"{key} LIKE %s")
             params.append(f"%{value}%")
 
+        # Agregar WHERE a las consultas
         if where_clauses:
-            query += " WHERE " + " AND ".join(where_clauses)
+            where_clause = " WHERE " + " AND ".join(where_clauses)
+            base_query += where_clause
+            count_query += where_clause
 
-        query += " ORDER BY fecha DESC OFFSET %s LIMIT %s"
+        # Consulta para contar el total de registros
+        cur.execute(count_query, params)
+        total_registros = cur.fetchone()[0]
 
+        # Calcular el número total de páginas
+        total_paginas = -(-total_registros // limite)
+
+        # Consulta para obtener registros con paginación
+        paginated_query = base_query + " ORDER BY fecha DESC OFFSET %s LIMIT %s"
         params.extend([offset, limite])
-        cur.execute(query, params)
-
+        cur.execute(paginated_query, params)
         registros = cur.fetchall()
 
+        # Preparar los registros para la respuesta
         columnas = [desc[0] for desc in cur.description]
-        devocionales = []
-        for registro in registros:
-            devocionales.append(dict(zip(columnas, registro)))
-        return devocionales
+        devocionales = [dict(zip(columnas, registro)) for registro in registros]
+
+        # Estructurar la respuesta
+        respuesta = {
+            "status": "success",
+            "data": {
+                "results": devocionales,
+                "count": total_registros,
+                "pages": total_paginas
+            }
+        }
+        return respuesta
+
 
 # Obtener los devocionales por su UUID
 def obtener_devocional_por_uuid(devocional_uuid):
@@ -86,38 +108,69 @@ def obtener_podcast_por_uuid(podcast_uuid):
         podcast = dict(zip(columnas, registro))
         return podcast
 
-# Obtiene las trivias de la base de datos
 def obtener_trivias(offset=0, limite=10):
     # Conexión a la base de datos
     with get_db_cursor() as cur:
+        # Primero, obtenemos el total de trivias en la base de datos
+        cur.execute("SELECT COUNT(*) FROM trivia")
+        total_registros = cur.fetchone()[0]
+
+        # Calcular el número total de páginas
+        total_paginas = -(-total_registros // limite)  # Redondeo hacia arriba
+
+        # Obtener los registros con paginación
         cur.execute("""
             SELECT * FROM trivia
             ORDER BY fecha DESC
             OFFSET %s LIMIT %s
         """, (offset, limite))
-
         registros = cur.fetchall()
 
+        # Preparar los registros para la respuesta
         columnas = [desc[0] for desc in cur.description]
-        trivias = []
-        for registro in registros:
-            trivias.append(dict(zip(columnas, registro)))
-        return trivias
+        trivias = [dict(zip(columnas, registro)) for registro in registros]
 
-# Obtiene los podcasts de la base de datos
+        # Estructurar la respuesta
+        respuesta = {
+            "status": "success",
+            "data": {
+                "results": trivias,
+                "count": total_registros,
+                "pages": total_paginas
+            }
+        }
+        return respuesta
+
+
 def obtener_podcasts(offset=0, limite=10):
     # Conexión a la base de datos
     with get_db_cursor() as cur:
+        # Obtener el total de podcasts en la base de datos
+        cur.execute("SELECT COUNT(*) FROM podcast")
+        total_registros = cur.fetchone()[0]
+
+        # Calcular el número total de páginas
+        total_paginas = -(-total_registros // limite)  # Redondeo hacia arriba
+
+        # Obtener los registros con paginación
         cur.execute("""
             SELECT * FROM podcast
             ORDER BY fecha DESC
             OFFSET %s LIMIT %s
         """, (offset, limite))
-
         registros = cur.fetchall()
 
+        # Preparar los registros para la respuesta
         columnas = [desc[0] for desc in cur.description]
-        podcasts = []
-        for registro in registros:
-            podcasts.append(dict(zip(columnas, registro)))
-        return podcasts
+        podcasts = [dict(zip(columnas, registro)) for registro in registros]
+
+        # Estructurar la respuesta
+        respuesta = {
+            "status": "success",
+            "data": {
+                "results": podcasts,
+                "count": total_registros,
+                "pages": total_paginas
+            }
+        }
+        return respuesta
