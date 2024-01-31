@@ -1,7 +1,8 @@
 from flask import Flask, jsonify, request
 from flask_restful import Resource, Api
 from app.read_file import analizar_documento
-from app.search import obtener_devocionales, obtener_trivias, obtener_podcasts, obtener_podcast_por_uuid, obtener_trivia_por_uuid, obtener_devocional_por_uuid
+from app.search import obtener_devocionales, obtener_trivias, obtener_podcasts, obtener_podcast_por_uuid, obtener_trivia_por_uuid, obtener_devocional_por_uuid, obtener_news
+from app.insert_data import insert_news
 import uuid
 from flask_cors import CORS
 
@@ -132,7 +133,33 @@ class AudioUploadResource(Resource):
                 return {'message': 'No audio file provided'}, 400
         except Exception as e:
             return {'message': 'An error occurred', 'error': str(e)}, 500
+
+class PostNews(Resource):
+    def post(self):
+        try:
+            image_file = request.files['image_file']
+            title = request.form['title']
+            description = request.form['description']
+
+            if image_file:
+                # Upload the audio file to Google Cloud Storage
+                file_url = upload_file_to_bucket(image_file,'casademipadre','casademipadre_bucket_news')
+
+                insert_news(file_url, title, description)
+
+                return {'message': 'New posted successfully', 'file_url': file_url}, 200
+            else:
+                return {'message': 'No audio file provided'}, 400
+        except Exception as e:
+            return {'message': 'An error occurred', 'error': str(e)}, 500
         
+# Retorna las news que hay en la base de datos
+class GetNews(Resource):
+    def get(self):
+        page = request.args.get('page', default = 0, type = int)
+        per_page = request.args.get('per_page', default = 10, type = int)
+        resp = obtener_news(page, per_page)
+        return jsonify(resp)
 
 
 api.add_resource(AudioUploadResource, '/upload-audio')
@@ -144,10 +171,12 @@ api.add_resource(Podcast, '/podcast-list')
 api.add_resource(PodcastById, '/podcast/<string:podcast_id>')
 api.add_resource(TriviaById, '/trivia/<string:trivia_id>')
 api.add_resource(DevocionalById, '/devocional/<string:devocional_id>')
+api.add_resource(PostNews, '/upload-news')
+api.add_resource(GetNews, '/news-list')
 
 def run_app():
     # Set port to 10000 for Render, default to 5000 for local development
-    port = int(os.environ.get('PORT', 5001))
+    port = int(os.environ.get('PORT', 10000))
     app.run(host='0.0.0.0', port=port, debug=False)
 
 if __name__ == '__main__':

@@ -166,3 +166,25 @@ def extract_and_convert_date(text):
         #print(date_obj)
     else:
         return datetime.now().date()
+
+def insert_news(image_url, title, description):
+    with get_db_cursor() as cur:
+        map = {}
+        map['fecha'] = datetime.now().date()
+        map['titulo'] = title
+        map['descripcion'] = description
+        map['imagen'] = image_url
+
+        try:
+
+            query = sql.SQL("""
+            INSERT INTO news (titulo, descripcion, imagen, fecha) 
+            VALUES (%(titulo)s, %(descripcion)s, %(imagen)s, %(fecha)s)
+            RETURNING id
+            """)
+            cur.execute(query, map)
+
+            return True
+
+        except Exception as e:
+            raise e
