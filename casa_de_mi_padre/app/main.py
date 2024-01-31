@@ -19,31 +19,36 @@ api = Api(app)
 class Devocional(Resource):
     def post(self):
         try:
-            # Get the file from the request
-            docx_file = request.files['file']
-            audio_file = request.files['podcast']
+            # Get the files from the request
+            docx_files = request.files.getlist('file')
+            audio_files = request.files.getlist('podcast')
 
-            if docx_file:
-                # Upload the file to the bucket
-                file_url = upload_file_to_bucket(docx_file, 'casademipadre','casademipadre_bucket_devocional')
-                podcast_url = upload_file_to_bucket(audio_file, 'casademipadre','casademipadre_bucket_podcast')
+            # Check if there are pairs of files provided
+            if docx_files and audio_files and len(docx_files) == len(audio_files):
+                results = []
 
-                # Analyze the document from the bucket
-                # If your analizar_documento function requires a local file path,
-                # you may need to download the file from file_url before analysis.
-                # Otherwise, if it can work with a URL, you can pass file_url directly.
-                analysis_result = analizar_documento(file_url, podcast_url)
+                # Process each pair of files
+                for docx_file, audio_file in zip(docx_files, audio_files):
+                    file_url = upload_file_to_bucket(docx_file, 'casademipadre', 'casademipadre_bucket_devocional')
+                    podcast_url = upload_file_to_bucket(audio_file, 'casademipadre', 'casademipadre_bucket_podcast')
 
-                # Return the analysis result and the file URL
-                return jsonify({
-                    'analysis_result': analysis_result,
-                    'file_url': file_url,
-                    'podcast_url': podcast_url,
-                })
+                    # Analyze the document and podcast
+                    analysis_result = analizar_documento(file_url, podcast_url)
+
+                    # Store each result
+                    results.append({
+                        'analysis_result': analysis_result,
+                        'file_url': file_url,
+                        'podcast_url': podcast_url,
+                    })
+
+                # Return the list of analysis results and file URLs
+                return jsonify(results)
             else:
-                return {'message': 'No file provided'}, 400
+                return {'message': 'An equal number of document and podcast files must be provided'}, 400
         except Exception as e:
             return {'message': 'An error occurred', 'error': str(e)}, 500
+
     
 class Devocionales(Resource):
     def get(self):
@@ -142,7 +147,7 @@ api.add_resource(DevocionalById, '/devocional/<string:devocional_id>')
 
 def run_app():
     # Set port to 10000 for Render, default to 5000 for local development
-    port = int(os.environ.get('PORT', 10000))
+    port = int(os.environ.get('PORT', 5001))
     app.run(host='0.0.0.0', port=port, debug=False)
 
 if __name__ == '__main__':

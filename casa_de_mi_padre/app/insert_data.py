@@ -3,11 +3,12 @@ from psycopg2 import sql
 from datetime import datetime
 import uuid  # If you need UUID generation
 from db.dbManager import get_db_cursor
+import re
 
 
 def insertar_datos(map):
  with get_db_cursor() as cur:
-    map['fecha'] = datetime.now().date()
+    map['fecha'] = extract_and_convert_date(map['titulo'])
     
     query = sql.SQL("""
         INSERT INTO devocionales (semana, 
@@ -54,26 +55,25 @@ def insertar_datos(map):
 
     map['devocional_id'] = devocional_id
 
-    # Luego, insertar la trivia usando el devocional_id
-    trivia_query = sql.SQL("""
-    INSERT INTO trivia (devocional_id, trivia, fecha, semana) 
-    VALUES (%(devocional_id)s, %(trivia)s, %(fecha)s, %(semana)s)
-    RETURNING id
-    """)
+    if map.get('trivia') and map['trivia'] != '{}':
+        trivia_query = sql.SQL("""
+        INSERT INTO trivia (devocional_id, trivia, fecha, semana) 
+        VALUES (%(devocional_id)s, %(trivia)s, %(fecha)s, %(semana)s)
+        RETURNING id
+        """)
+        cur.execute(trivia_query, map)
 
-    cur.execute(trivia_query, map)
+        trivia_id = cur.fetchone()[0]
 
-    trivia_id = cur.fetchone()[0]
+        map['trivia_id'] = trivia_id
 
-    map['trivia_id'] = trivia_id
-
-    # Luego, insertar el id de la trivia en la tabla devocionales
-    devocional_trivia_query = sql.SQL("""
-    UPDATE devocionales
-    SET trivia_id = %(trivia_id)s
-    WHERE id = %(devocional_id)s
-    """)
-    cur.execute(devocional_trivia_query, map)
+        # Luego, insertar el id de la trivia en la tabla devocionales
+        devocional_trivia_query = sql.SQL("""
+        UPDATE devocionales
+        SET trivia_id = %(trivia_id)s
+        WHERE id = %(devocional_id)s
+        """)
+        cur.execute(devocional_trivia_query, map)
 
     # Luego, insertar la trivia usando el devocional_id
     podcast_query = sql.SQL("""
@@ -132,3 +132,37 @@ def insert_audio_file_data(map, devocional_id):
 
         except Exception as e:
             raise e
+        
+
+def extract_and_convert_date(text):
+    # Diccionario para mapear nombres de meses en español a inglés
+    months_es_to_en = {
+        'enero': 'January',
+        'febrero': 'February',
+        'marzo': 'March',
+        'abril': 'April',
+        'mayo': 'May',
+        'junio': 'June',
+        'julio': 'July',
+        'agosto': 'August',
+        'septiembre': 'September',
+        'octubre': 'October',
+        'noviembre': 'November',
+        'diciembre': 'December'
+    }
+
+    # Extraer la fecha usando expresión regular
+    match = re.search(r'(\d{1,2}) de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) de (\d{4})', text)
+    if match:
+        day, month_es, year = match.groups()
+        month_en = months_es_to_en[month_es.lower()]
+        date_str = f'{day} {month_en} {year}'
+
+        # Convertir la cadena de fecha a un objeto datetime
+        date_obj = datetime.strptime(date_str, '%d %B %Y')
+
+        # date_obj es ahora un objeto datetime representando la fecha
+        return date_obj
+        #print(date_obj)
+    else:
+        return datetime.now().date()
