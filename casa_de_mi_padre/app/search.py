@@ -11,8 +11,8 @@ from db.dbManager import get_db_cursor
 def obtener_devocionales(filters, offset=0, limite=10):
     with get_db_cursor() as cur:
         # Base de la consulta
-        base_query = "SELECT * FROM devocionales"
-        count_query = "SELECT COUNT(*) FROM devocionales"
+        base_query = "SELECT * FROM devocionales WHERE fecha <= CURRENT_DATE"
+        count_query = "SELECT COUNT(*) FROM devocionales WHERE fecha <= CURRENT_DATE"
 
         # Construir cláusulas WHERE para filtrar
         where_clauses = []
@@ -121,6 +121,7 @@ def obtener_trivias(offset=0, limite=10):
         # Obtener los registros con paginación
         cur.execute("""
             SELECT * FROM trivia
+            WHERE fecha <= CURRENT_DATE
             ORDER BY fecha DESC
             OFFSET %s LIMIT %s
         """, (offset, limite))
@@ -155,6 +156,7 @@ def obtener_podcasts(offset=0, limite=10):
         # Obtener los registros con paginación
         cur.execute("""
             SELECT * FROM podcast
+            WHERE fecha <= CURRENT_DATE
             ORDER BY fecha DESC
             OFFSET %s LIMIT %s
         """, (offset, limite))
