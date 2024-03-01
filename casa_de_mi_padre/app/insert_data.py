@@ -95,6 +95,26 @@ def insertar_datos(map):
     """)
     cur.execute(devocional_podcast_query, map)
 
+    if map.get('libro') and map['libro'] != '':
+        biografia_query = sql.SQL("""
+        INSERT INTO biografias (devocional_id, libro, personaje, biografia, fecha) 
+        VALUES (%(devocional_id)s, %(libro)s, %(personaje)s, %(texto)s, %(fecha)s)
+        RETURNING id
+        """)
+        cur.execute(biografia_query, map)
+
+        biografia_id = cur.fetchone()[0]
+
+        map['biografia_id'] = biografia_id
+
+        # Luego, insertar el id del podcast en la tabla devocionales
+        devocional_biografia_query = sql.SQL("""
+        UPDATE devocionales
+        SET biografia_id = %(biografia_id)s
+        WHERE id = %(devocional_id)s
+        """)
+        cur.execute(devocional_biografia_query, map)
+
 def generate_unique_uuid(conn):
     while True:
         unique_uuid = uuid.uuid4()
