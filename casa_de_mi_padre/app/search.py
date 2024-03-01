@@ -209,3 +209,36 @@ def obtener_news(offset=0, limite=10):
             }
         }
         return respuesta
+    
+def obtener_biografias(offset=0, limite=10):
+    # Conexión a la base de datos
+    with get_db_cursor() as cur:
+        # Obtener el total de podcasts en la base de datos
+        cur.execute("SELECT COUNT(*) FROM biografias")
+        total_registros = cur.fetchone()[0]
+
+        # Calcular el número total de páginas
+        total_paginas = -(-total_registros // limite)  # Redondeo hacia arriba
+
+        # Obtener los registros con paginación
+        cur.execute("""
+            SELECT * FROM biografias
+            ORDER BY fecha DESC
+            OFFSET %s LIMIT %s
+        """, (offset, limite))
+        registros = cur.fetchall()
+
+        # Preparar los registros para la respuesta
+        columnas = [desc[0] for desc in cur.description]
+        biografias = [dict(zip(columnas, registro)) for registro in registros]
+
+        # Estructurar la respuesta
+        respuesta = {
+            "status": "success",
+            "data": {
+                "results": biografias,
+                "count": total_registros,
+                "pages": total_paginas
+            }
+        }
+        return respuesta

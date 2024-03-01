@@ -1,5 +1,6 @@
 from docx import Document
 import requests
+import re
 from unidecode import unidecode
 from app.insert_data import insertar_datos
 #from firebase import send_push_notifications
@@ -120,11 +121,11 @@ def analizar_documento(file_url, podcast_url):
     #print(map)
 
     map["podcast"] = podcast_url
-    
+
     libro, personaje, biografia = extract_biography(map["biografia"])
     map["libro"] = libro
     map["personaje"] = personaje
-    map["biografia"] = biografia
+    map["texto"] = biografia
 
     insertar_datos(map)
 

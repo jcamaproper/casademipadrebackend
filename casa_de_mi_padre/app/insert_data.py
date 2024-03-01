@@ -98,7 +98,7 @@ def insertar_datos(map):
     if map.get('libro') and map['libro'] != '':
         biografia_query = sql.SQL("""
         INSERT INTO biografias (devocional_id, libro, personaje, biografia, fecha) 
-        VALUES (%(devocional_id)s, %(titulo)s, %(biografia)s, %(fecha)s)
+        VALUES (%(devocional_id)s, %(libro)s, %(personaje)s, %(texto)s, %(fecha)s)
         RETURNING id
         """)
         cur.execute(biografia_query, map)
