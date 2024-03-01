@@ -120,6 +120,11 @@ def analizar_documento(file_url, podcast_url):
     #print(map)
 
     map["podcast"] = podcast_url
+    
+    libro, personaje, biografia = extract_biography(map["biografia"])
+    map["libro"] = libro
+    map["personaje"] = personaje
+    map["biografia"] = biografia
 
     insertar_datos(map)
 
@@ -159,6 +164,21 @@ def extract_questions_to_map(text):
                 questions_map[current_chapter].append(line.strip())
 
     return questions_map
+
+def extract_biography(text):
+    # Extract 'libro'
+    libro_match = re.search(r"Personajes principales de (\w+)", text)
+    libro = libro_match.group(1) if libro_match else None
+
+    # Extract 'personaje'
+    personaje_match = re.search(r"\n(\w+)", text)
+    personaje = personaje_match.group(1) if personaje_match else None
+
+    # Extract 'biografia'
+    biografia_start = text.find(personaje) + len(personaje)
+    biografia = text[biografia_start:].strip()
+
+    return libro, personaje, biografia
 
 # Reemplaza 'ruta_del_documento.docx' con la ruta de tu propio documento de Word
 # ruta_del_documento = 'template4.docx'
