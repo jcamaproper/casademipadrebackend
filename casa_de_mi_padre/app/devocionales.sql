@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS devocionales (
     biografia TEXT,
     trivia_id UUID,
     fecha DATE,
-    podcast_id UUID
+    podcast_id UUID,
+    biografia_id UUID
 );
 
 /*EJECUTAR AMBOS DESPUES DE CREAR LA TABLA DEVOCIONALES, TRIVIA Y PODCAST*/
@@ -28,3 +29,7 @@ FOREIGN KEY (podcast_id) REFERENCES podcast(id);
 ALTER TABLE devocionales
 ADD CONSTRAINT fk_trivia
 FOREIGN KEY (trivia_id) REFERENCES trivia(id);
+
+ALTER TABLE devocionales
+ADD CONSTRAINT fk_biografia
+FOREIGN KEY (biografia_id) REFERENCES biografias(id);
