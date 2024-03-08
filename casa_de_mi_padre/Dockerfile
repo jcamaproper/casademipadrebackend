@@ -10,6 +10,9 @@ ENV PYTHONPATH /casa_de_mi_padre
 # Set the Google Cloud credentials environment variable
 ENV GOOGLE_APPLICATION_CREDENTIALS /etc/secrets/gcp-service-account.json
 
+# Set the environment variable for firebase
+ENV FIREBASE_APPLICATION_CREDENTIALS /etc/secrets/firebase-service-account.json
+
 # Copy the current directory contents into the container at /casa_de_mi_padre
 COPY . /casa_de_mi_padre
 
