@@ -5,6 +5,7 @@ from app.search import obtener_devocionales, obtener_trivias, obtener_podcasts, 
 from app.insert_data import insert_news
 import uuid
 from flask_cors import CORS
+from app.firebase import upsert_users_and_tokens
 
 if __name__ == '__main__':
     from mocks import respuestas_mocks
@@ -161,6 +162,15 @@ class GetNews(Resource):
         resp = obtener_news(page, per_page)
         return jsonify(resp)
 
+# Inserta un usuario y su token en la base de datos
+class InsertUserToken(Resource):
+    def post(self, token):
+        email = request.args.get('email', default=None)
+        try:
+            resp = upsert_users_and_tokens(email, token)
+            return jsonify(resp)
+        except Exception as e:
+            return {'message': 'An error occurred', 'error': str(e)}, 500
 
 api.add_resource(AudioUploadResource, '/upload-audio')
 api.add_resource(Devocional, '/devocional')
@@ -173,6 +183,7 @@ api.add_resource(TriviaById, '/trivia/<string:trivia_id>')
 api.add_resource(DevocionalById, '/devocional/<string:devocional_id>')
 api.add_resource(PostNews, '/upload-news')
 api.add_resource(GetNews, '/news-list')
+api.add_resource(InsertUserToken, '/insert-user-token/<string:token>') #/insert-user-token/someToken123?email=example@example.com
 
 def run_app():
     # Set port to 10000 for Render, default to 5000 for local development
@@ -181,4 +192,3 @@ def run_app():
 
 if __name__ == '__main__':
     run_app()
- 

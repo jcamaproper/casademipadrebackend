@@ -6,6 +6,8 @@ from app.insert_data import insertar_datos
 import json
 import os
 import json
+from app.firebase import send_push_notifications
+
 
 
 # Load environment variables from .env file
@@ -122,9 +124,8 @@ def analizar_documento(file_url, podcast_url):
     map["podcast"] = podcast_url
 
     insertar_datos(map)
+    send_push_notifications()
 
-    #Despues de insertar los datos, se debe enviar una notificacion a los usuarios
-    #send_push_notifications()
     os.remove(temp_path)
     return map
 
