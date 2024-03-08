@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_restful import Resource, Api
 from app.read_file import analizar_documento
-from app.search import obtener_devocionales, obtener_trivias, obtener_podcasts, obtener_podcast_por_uuid, obtener_trivia_por_uuid, obtener_devocional_por_uuid, obtener_news
+from app.search import obtener_devocionales, obtener_biografias, obtener_trivias, obtener_podcasts, obtener_podcast_por_uuid, obtener_trivia_por_uuid, obtener_devocional_por_uuid, obtener_news
 from app.insert_data import insert_news
 import uuid
 from flask_cors import CORS
@@ -172,6 +172,14 @@ class InsertUserToken(Resource):
         except Exception as e:
             return {'message': 'An error occurred', 'error': str(e)}, 500
 
+# Retorna las biografias que hay en la base de datos
+class Biografia(Resource):
+    def get(self):
+        page = request.args.get('page', default = 0, type = int)
+        per_page = request.args.get('per_page', default = 10, type = int)
+        resp = obtener_biografias(page, per_page)
+        return jsonify(resp)
+    
 api.add_resource(AudioUploadResource, '/upload-audio')
 api.add_resource(Devocional, '/devocional')
 api.add_resource(Mocks, '/mocks')
@@ -184,6 +192,7 @@ api.add_resource(DevocionalById, '/devocional/<string:devocional_id>')
 api.add_resource(PostNews, '/upload-news')
 api.add_resource(GetNews, '/news-list')
 api.add_resource(InsertUserToken, '/insert-user-token/<string:token>') #/insert-user-token/someToken123?email=example@example.com
+api.add_resource(Biografia, '/biografias-list')
 
 def run_app():
     # Set port to 10000 for Render, default to 5000 for local development

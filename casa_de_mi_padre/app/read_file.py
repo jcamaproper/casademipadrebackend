@@ -7,7 +7,7 @@ import json
 import os
 import json
 from app.firebase import send_push_notifications
-
+import re
 
 
 # Load environment variables from .env file
@@ -123,6 +123,17 @@ def analizar_documento(file_url, podcast_url):
 
     map["podcast"] = podcast_url
 
+    if "biografia" in map and map["biografia"] == "Personajes principales de \n":
+        map["biografia"] = ""
+
+    if "biografia" in map:
+        libro, personaje, texto = extract_biography(map["biografia"])
+        map["libro"] = libro
+        map["personaje"] = personaje
+        map["texto"] = texto
+
+
+
     insertar_datos(map)
     send_push_notifications()
 
@@ -160,6 +171,25 @@ def extract_questions_to_map(text):
                 questions_map[current_chapter].append(line.strip())
 
     return questions_map
+
+def extract_biography(text):
+    # Extract 'libro'
+    libro_match = re.search(r"Personajes principales de (\w+)", text)
+    libro = libro_match.group(1) if libro_match else ""
+
+    # Extract 'personaje'
+    personaje_match = re.search(r"\n(\w+)", text)
+    personaje = personaje_match.group(1) if personaje_match else ""
+
+    # Ensure 'personaje' is found in 'text' before extracting 'biografia'
+    if personaje and personaje in text:
+        biografia_start = text.find(personaje) + len(personaje)
+        biografia = text[biografia_start:].strip()
+    else:
+        biografia = ""
+
+    return libro, personaje, biografia
+
 
 # Reemplaza 'ruta_del_documento.docx' con la ruta de tu propio documento de Word
 # ruta_del_documento = 'template4.docx'
