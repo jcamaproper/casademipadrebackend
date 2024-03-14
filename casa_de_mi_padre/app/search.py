@@ -147,7 +147,7 @@ def obtener_podcasts(offset=0, limite=10):
     # Conexión a la base de datos
     with get_db_cursor() as cur:
         # Obtener el total de podcasts en la base de datos
-        cur.execute("SELECT COUNT(*) FROM podcast")
+        cur.execute("SELECT COUNT(*) FROM podcast WHERE fecha <= CURRENT_DATE")
         total_registros = cur.fetchone()[0]
 
         # Calcular el número total de páginas

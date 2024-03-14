@@ -81,9 +81,13 @@ class Trivia(Resource):
 # Retorna los podcasts que hay en la base de datos
 class Podcast(Resource):
     def get(self):
-        page = request.args.get('page', default = 0, type = int)
-        per_page = request.args.get('per_page', default = 10, type = int)
-        resp = obtener_podcasts(page, per_page)
+        page = request.args.get('page', default=1, type=int)  # Set default page to 1
+        per_page = request.args.get('per_page', default=10, type=int)
+        # Ensure page is at least 1
+        page = max(page, 1)
+        # Calculate the offset ensuring it's never negative
+        offset = (page - 1) * per_page
+        resp = obtener_podcasts(offset, per_page)
         return jsonify(resp)
 # Retorna un podcast por su UUID
 
