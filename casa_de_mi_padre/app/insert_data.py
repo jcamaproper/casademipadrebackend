@@ -4,6 +4,7 @@ from datetime import datetime
 import uuid  # If you need UUID generation
 from db.dbManager import get_db_cursor
 import re
+from app.firebase import send_push_notifications
 
 
 def insertar_datos(map):
@@ -204,7 +205,12 @@ def insert_news(image_url, title, description):
             """)
             cur.execute(query, map)
 
+            send_push_notifications(title, description)
+
             return True
+
+
+
 
         except Exception as e:
             raise e
