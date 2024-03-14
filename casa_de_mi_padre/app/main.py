@@ -5,7 +5,7 @@ from app.search import obtener_devocionales, obtener_biografias, obtener_trivias
 from app.insert_data import insert_news
 import uuid
 from flask_cors import CORS
-from app.firebase import upsert_users_and_tokens
+from app.firebase import upsert_users_and_tokens, send_devotional_push_notification
 
 if __name__ == '__main__':
     from mocks import respuestas_mocks
@@ -184,6 +184,15 @@ class Biografia(Resource):
         resp = obtener_biografias(page, per_page)
         return jsonify(resp)
     
+# Envia notificaciones push a los usuarios si hay un nuevo devocional del día
+class SendNotification(Resource):
+    def get(self):
+        try:
+            send_devotional_push_notification()
+            return "Push notifications sent successfully", 200
+        except Exception as e:
+            return {'message': 'An error occurred', 'error': str(e)}, 500
+    
 api.add_resource(AudioUploadResource, '/upload-audio')
 api.add_resource(Devocional, '/devocional')
 api.add_resource(Mocks, '/mocks')
@@ -197,6 +206,7 @@ api.add_resource(PostNews, '/upload-news')
 api.add_resource(GetNews, '/news-list')
 api.add_resource(InsertUserToken, '/insert-user-token/<string:token>') #/insert-user-token/someToken123?email=example@example.com
 api.add_resource(Biografia, '/biografias-list')
+api.add_resource(SendNotification, '/send-notification')
 
 def run_app():
     # Set port to 10000 for Render, default to 5000 for local development
