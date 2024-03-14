@@ -197,20 +197,14 @@ def insert_news(image_url, title, description):
         map['imagen'] = image_url
 
         try:
-
             query = sql.SQL("""
             INSERT INTO news (titulo, descripcion, imagen, fecha) 
             VALUES (%(titulo)s, %(descripcion)s, %(imagen)s, %(fecha)s)
             RETURNING id
             """)
             cur.execute(query, map)
-
             send_push_notifications(title, description)
-
             return True
-
-
-
 
         except Exception as e:
             raise e

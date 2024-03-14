@@ -186,7 +186,7 @@ class Biografia(Resource):
     
 # Envia notificaciones push a los usuarios si hay un nuevo devocional del día
 class SendNotification(Resource):
-    def get(self):
+    def post(self):
         try:
             send_devotional_push_notification()
             return "Push notifications sent successfully", 200

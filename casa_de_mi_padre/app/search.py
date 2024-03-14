@@ -11,8 +11,8 @@ from db.dbManager import get_db_cursor
 def obtener_devocionales(filters, offset=0, limite=10):
     with get_db_cursor() as cur:
         # Base de la consulta
-        base_query = "SELECT * FROM devocionales WHERE fecha <= CURRENT_DATE"
-        count_query = "SELECT COUNT(*) FROM devocionales WHERE fecha <= CURRENT_DATE"
+        base_query = "SELECT * FROM devocionales WHERE fecha <= CURRENT_DATE "
+        count_query = "SELECT COUNT(*) FROM devocionales WHERE fecha <= CURRENT_DATE "
 
         # Construir cláusulas WHERE para filtrar
         where_clauses = []
@@ -23,9 +23,9 @@ def obtener_devocionales(filters, offset=0, limite=10):
 
         # Agregar WHERE a las consultas
         if where_clauses:
-            where_clause = " WHERE " + " AND ".join(where_clauses)
-            base_query += where_clause
-            count_query += where_clause
+            where_clause = " AND ".join(where_clauses)
+            base_query += " AND " + where_clause
+            count_query += " AND " + where_clause
 
         # Consulta para contar el total de registros
         cur.execute(count_query, params)
