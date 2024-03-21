@@ -4,6 +4,7 @@ from firebase_admin import credentials, messaging
 from db.dbManager import get_db_cursor
 import os
 from datetime import datetime
+import locale
 
 
 # Use the FIREBASE_APPLICATION_CREDENTIALS environment variable
@@ -67,7 +68,9 @@ def upsert_users_and_tokens(email=None, token=None):
 
 def send_devotional_push_notification():
     today_date = datetime.now().strftime('%Y-%m-%d')
+    locale.setlocale(locale.LC_TIME, 'es_ES.utf8' or 'es.utf8')
     format_date = datetime.now().strftime('%d de %B de %Y')
+    
     with get_db_cursor() as cur:
         cur.execute("SELECT titulo, tema FROM devocionales WHERE fecha = %s", (today_date,))
         devotional = cur.fetchone()
