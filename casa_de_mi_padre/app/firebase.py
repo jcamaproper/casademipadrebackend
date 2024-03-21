@@ -4,8 +4,6 @@ from firebase_admin import credentials, messaging
 from db.dbManager import get_db_cursor
 import os
 from datetime import datetime
-import locale
-
 
 # Use the FIREBASE_APPLICATION_CREDENTIALS environment variable
 cred = credentials.Certificate(os.environ.get('FIREBASE_APPLICATION_CREDENTIALS'))
@@ -66,11 +64,21 @@ def upsert_users_and_tokens(email=None, token=None):
         except Exception as e:
             raise e
 
+def format_date_spanish(date):
+    months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", 
+              "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
+    day = date.day
+    month = months[date.month - 1]
+    year = date.year
+
+    formatted_date = f"{day} de {month} de {year}"
+    return formatted_date
+
 def send_devotional_push_notification():
     today_date = datetime.now().strftime('%Y-%m-%d')
-    locale.setlocale(locale.LC_TIME, 'es_ES.utf8' or 'es.utf8')
-    format_date = datetime.now().strftime('%d de %B de %Y')
-    
+    # Use Babel to format the date in Spanish
+    format_date = format_date_spanish(datetime.now())
+
     with get_db_cursor() as cur:
         cur.execute("SELECT titulo, tema FROM devocionales WHERE fecha = %s", (today_date,))
         devotional = cur.fetchone()

@@ -10,7 +10,7 @@ from app.firebase import upsert_users_and_tokens, send_devotional_push_notificat
 if __name__ == '__main__':
     from mocks import respuestas_mocks
 
-from upload_file_to_bucket import upload_file_to_bucket
+from upload_file_to_bucket import upload_file_to_bucket, check_file_exists
 import os
 
 
@@ -31,6 +31,13 @@ class Devocional(Resource):
 
                 # Process each pair of files
                 for docx_file, audio_file in zip(docx_files, audio_files):
+                    # Validate if the files already exist
+                    if check_file_exists(docx_file, 'casademipadre', 'casademipadre_bucket_devocional'):
+                        return {'message': f'The document file {docx_file.filename} already exists'}, 400
+                                        
+                    if check_file_exists(audio_file, 'casademipadre', 'casademipadre_bucket_podcast'):
+                        return {'message': f'The podcast file {audio_file.filename} already exists'}, 400  
+                                      
                     file_url = upload_file_to_bucket(docx_file, 'casademipadre', 'casademipadre_bucket_devocional')
                     podcast_url = upload_file_to_bucket(audio_file, 'casademipadre', 'casademipadre_bucket_podcast')
 

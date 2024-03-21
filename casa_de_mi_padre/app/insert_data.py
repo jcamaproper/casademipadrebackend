@@ -11,6 +11,11 @@ def insertar_datos(map):
  with get_db_cursor() as cur:
     map['fecha'] = extract_and_convert_date(map['titulo'])
     
+    # Check if there is an existing devocional with the same fecha
+    cur.execute("SELECT COUNT(*) FROM devocionales WHERE fecha = %s", (map['fecha'],))
+    if cur.fetchone()[0] > 0:
+        return "already exist"
+    
     query = sql.SQL("""
         INSERT INTO devocionales (semana, 
          titulo_video,
