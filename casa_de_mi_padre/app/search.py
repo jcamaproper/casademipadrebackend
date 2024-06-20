@@ -5,6 +5,8 @@ from insert_data import insertar_datos
 from psycopg2.extras import register_uuid
 from dotenv import load_dotenv
 from db.dbManager import get_db_cursor
+from psycopg2 import sql
+
 
 # Obtiene los devocionales de la base de datos
 # filters: columna por la que se va a filtrar
@@ -243,3 +245,48 @@ def obtener_biografias(offset=0, limite=10):
         }
         
         return respuesta
+    
+def get_comments(devotional_id, podcast_id):
+    with get_db_cursor() as cur:
+        try:
+            query = sql.SQL("""
+            SELECT c.id, c.comentario, c.fecha, u.email
+            FROM comentarios c
+            JOIN usuarios u ON c.usuario_id = u.id
+            WHERE (c.devocional_id = %s OR %s IS NULL OR %s = '')
+            AND (c.podcast_id = %s OR %s IS NULL OR %s = '')
+            AND c.comentario_id IS NULL
+            ORDER BY c.fecha DESC
+            """)
+            params = [devotional_id, devotional_id, devotional_id, podcast_id, podcast_id, podcast_id]
+            cur.execute(query, params)
+            comments = cur.fetchall()
+
+            for comment in comments:
+                query = sql.SQL("""
+                SELECT c.id, c.comentario, c.fecha, u.email
+                FROM comentarios c
+                JOIN usuarios u ON c.usuario_id = u.id
+                WHERE c.comentario_id = %s
+                ORDER BY c.fecha DESC
+                """)
+                cur.execute(query, (comment[0],))
+                replies = cur.fetchall()
+                comment.append(replies)
+
+            return comments
+
+        except Exception as e:
+            raise e
+        
+def get_devotionals_titles():
+    with get_db_cursor() as cur:
+        try:
+            query = sql.SQL("""
+            SELECT id, titulo FROM devocionales
+            """)
+            cur.execute(query)
+            return cur.fetchall()
+
+        except Exception as e:
+            raise e

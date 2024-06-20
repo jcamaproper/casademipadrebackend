@@ -256,38 +256,7 @@ def insert_comment_reply(devotional_id, podcast_id, user_id, comment_id, comment
         except Exception as e:
             raise e
         
-def get_comments(devotional_id, podcast_id):
-    with get_db_cursor() as cur:
-        try:
-            query = sql.SQL("""
-            SELECT c.id, c.comentario, c.fecha, u.email
-            FROM comentarios c
-            JOIN usuarios u ON c.usuario_id = u.id
-            WHERE (c.devocional_id = %s OR %s IS NULL OR %s = '')
-            AND (c.podcast_id = %s OR %s IS NULL OR %s = '')
-            AND c.comentario_id IS NULL
-            ORDER BY c.fecha DESC
-            """)
-            params = [devotional_id, devotional_id, devotional_id, podcast_id, podcast_id, podcast_id]
-            cur.execute(query, params)
-            comments = cur.fetchall()
 
-            for comment in comments:
-                query = sql.SQL("""
-                SELECT c.id, c.comentario, c.fecha, u.email
-                FROM comentarios c
-                JOIN usuarios u ON c.usuario_id = u.id
-                WHERE c.comentario_id = %s
-                ORDER BY c.fecha DESC
-                """)
-                cur.execute(query, (comment[0],))
-                replies = cur.fetchall()
-                comment.append(replies)
-
-            return comments
-
-        except Exception as e:
-            raise e
         
 def delete_comment(comment_id):
     with get_db_cursor() as cur:
@@ -297,18 +266,6 @@ def delete_comment(comment_id):
             """)
             cur.execute(query, (comment_id,))
             return True
-
-        except Exception as e:
-            raise e
-
-def get_devotionals_titles():
-    with get_db_cursor() as cur:
-        try:
-            query = sql.SQL("""
-            SELECT id, titulo FROM devocionales
-            """)
-            cur.execute(query)
-            return cur.fetchall()
 
         except Exception as e:
             raise e
