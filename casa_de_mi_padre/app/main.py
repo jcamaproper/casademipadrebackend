@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_restful import Resource, Api
 from app.read_file import analizar_documento
-from app.search import obtener_devocionales, obtener_biografias, obtener_trivias, obtener_podcasts, obtener_podcast_por_uuid, obtener_trivia_por_uuid, obtener_devocional_por_uuid, obtener_news, get_devotionals_titles, get_comments
+from app.search import obtener_devocionales, obtener_biografias, obtener_trivias, obtener_podcasts, obtener_podcast_por_uuid, obtener_trivia_por_uuid, obtener_devocional_por_uuid, obtener_news, get_devotionals_titles, get_comments,get_current_users
 from app.insert_data import insert_news, insert_comment, insert_comment_reply, delete_comment
 import uuid
 from flask_cors import CORS
@@ -217,19 +217,18 @@ class Comment(Resource):
             podcast_id = request.form['podcast_id']
             user_id = request.form['user_id']
             comment = request.form['comment']
-            resp = insert_comment(devotional_id, podcast_id, user_id, comment)
-            return jsonify(resp)
+            insert_comment(devotional_id, podcast_id, user_id, comment)
+            return {'message': 'Comment posted successfully'}
         except Exception as e:
             return {'message': 'An error occurred', 'error': str(e)}, 500
 
 # Crea una respuesta a un comentario
 class CommentReply(Resource):
-    def post(self):
+    def post(self, comment_id):
         try:
             devotional_id = request.form['devotional_id']
             podcast_id = request.form['podcast_id']
             user_id = request.form['user_id']
-            comment_id = request.form['comment_id']
             comment = request.form['comment']
             resp = insert_comment_reply(devotional_id, podcast_id, user_id, comment_id, comment)
             return jsonify(resp)
@@ -240,8 +239,8 @@ class CommentReply(Resource):
 class DeleteComment(Resource):
     def delete(self, comment_id):
         try:
-            resp = delete_comment(comment_id)
-            return jsonify(resp)
+            delete_comment(comment_id)
+            return {'message': 'Comment deleted successfully'}
         except Exception as e:
             return {'message': 'An error occurred', 'error': str(e)}, 500
         
@@ -252,6 +251,15 @@ class Comments(Resource):
             devotional_id = request.args.get('devotional_id', default=None)
             podcast_id = request.args.get('podcast_id', default=None)
             resp = get_comments(devotional_id, podcast_id)
+            return jsonify(resp)
+        except Exception as e:
+            return {'message': 'An error occurred', 'error': str(e)}, 500
+        
+# Retorna los usuarios activos
+class CurrentUsers(Resource):
+    def get(self):
+        try:
+            resp = get_current_users()
             return jsonify(resp)
         except Exception as e:
             return {'message': 'An error occurred', 'error': str(e)}, 500
@@ -270,11 +278,12 @@ api.add_resource(GetNews, '/news-list')
 api.add_resource(InsertUserToken, '/insert-user-token/<string:token>') #/insert-user-token/someToken123?email=example@example.com
 api.add_resource(Biografia, '/biografias-list')
 api.add_resource(SendNotification, '/send-notification')
-api.add_resource(DevocionalTitleList, '/devocional')
+api.add_resource(DevocionalTitleList, '/devocionales-titles')
 api.add_resource(Comment, '/comment')
-api.add_resource(CommentReply, '/comment-reply')
+api.add_resource(CommentReply, '/comment-reply/<string:comment_id>')
 api.add_resource(DeleteComment, '/delete-comment/<string:comment_id>')
 api.add_resource(Comments, '/comments')
+api.add_resource(CurrentUsers, '/current-users')
 
 def run_app():
     # Set port to 10000 for Render, default to 5000 for local development
