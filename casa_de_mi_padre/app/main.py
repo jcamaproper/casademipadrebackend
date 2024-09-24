@@ -213,10 +213,11 @@ class DevocionalTitleList(Resource):
 class Comment(Resource):
     def post(self):
         try:
-            devotional_id = request.form['devotional_id']
-            podcast_id = request.form['podcast_id']
-            user_id = request.form['user_id']
-            comment = request.form['comment']
+            data = request.get_json()
+            devotional_id = data['devotional_id']
+            podcast_id = data['podcast_id']
+            user_id = data['user_id']
+            comment = data['comment']
             insert_comment(devotional_id, podcast_id, user_id, comment)
             return {'message': 'Comment posted successfully'}
         except Exception as e:
@@ -226,10 +227,11 @@ class Comment(Resource):
 class CommentReply(Resource):
     def post(self, comment_id):
         try:
-            devotional_id = request.form['devotional_id']
-            podcast_id = request.form['podcast_id']
-            user_id = request.form['user_id']
-            comment = request.form['comment']
+            data = request.get_json()
+            devotional_id = data['devotional_id']
+            podcast_id = data['podcast_id']
+            user_id = data['user_id']
+            comment = data['comment']
             resp = insert_comment_reply(devotional_id, podcast_id, user_id, comment_id, comment)
             return jsonify(resp)
         except Exception as e:
