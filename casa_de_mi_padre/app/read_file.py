@@ -1,7 +1,7 @@
 from docx import Document
 import requests
 from unidecode import unidecode
-from app.insert_data import insertar_datos
+from app.insert_data import insertar_datos, extract_and_convert_date
 #from firebase import send_push_notifications
 import json
 import os
@@ -11,7 +11,7 @@ import re
 
 # Load environment variables from .env file
 
-def analizar_documento(file_url, podcast_url):
+def analizar_documento(file_url, podcast_url, file_name):
     # Abre el documento de Word
     with requests.get(file_url, stream=True) as response:
         response.raise_for_status()  # This will raise an exception for HTTP errors
@@ -50,9 +50,6 @@ def analizar_documento(file_url, podcast_url):
             map["descripcion_audio"] = para
         elif index == 9:
             map["soundcloud_link"] = para
-
-
-
 
     for i, table in enumerate(doc.tables):
         for j, row in enumerate(table.rows):
@@ -121,6 +118,9 @@ def analizar_documento(file_url, podcast_url):
     #print(map)
 
     map["podcast"] = podcast_url
+
+    if map.get('titulo') is None or map.get('tema') is None or map.get('instrucciones') is None or map.get('devocional') is None or map.get('reflexion') is None:
+        return analizar_documento_v2(doc, podcast_url, file_name, temp_path)
 
     if "biografia" in map and map["biografia"] == "Personajes principales de \n":
         map["biografia"] = ""
@@ -207,3 +207,55 @@ def extract_biography(text):
 #             devocionales.append(dict(zip(columnas, registro)))
 #     return devocionales
 
+def analizar_documento_v2(doc, podcast_url, file_name, temp_path):
+    map = {}
+    parrafos = []
+    devocional = ""
+    # Se eliminan los espacios en blanco para no tener problemas con los saltos de línea
+    for index, para in enumerate(doc.paragraphs):
+        if para.text == "":
+            continue
+        else:
+            parrafos.append(para.text)
+
+    for index, para in enumerate(parrafos):
+        #print(f"row {index}: {para}")
+        if index == 0:
+            map["titulo"] = para
+            map["tema"] = para
+        # join each paragraph to the previous one
+        if index > 0:
+            devocional = devocional + " " + para
+    
+    map["devocional"] = devocional
+    map["podcast"] = podcast_url
+
+    # file name is '1. Enero 1 - Génesis 1.docx'
+    # Semana. Dia. Capitulo.docx
+    semana = file_name.split('.')[0]
+    dia = file_name.split('.')[1].split('-')[0]
+    capitulo = file_name.split('.')[1].split('-')[1]
+    map["semana"] = "Semana " + semana
+    map["dia"] = dia
+    map["capitulo"] = capitulo
+    # extract the date from the file name, use the current year
+    map["fecha"] = extract_and_convert_date(file_name)
+   
+    # from devocionales table, set empty values for the columns that are not in the map
+    map["titulo_video"] = ""
+    map["video_link"] = ""
+    map["descripcion_video"] = ""
+    map["titulo_audio"] = ""
+    map["descripcion_audio"] = ""
+    map["soundcloud_link"] = ""
+    map["instrucciones"] = ""
+    map["reflexion"] = ""
+    map["lectura"] = ""
+    map["libro"] = ""
+    map["biografia"] = ""
+
+    insertar_datos(map)
+
+    os.remove(temp_path)
+
+    return map

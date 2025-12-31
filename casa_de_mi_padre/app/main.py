@@ -10,7 +10,7 @@ from app.firebase import upsert_users_and_tokens, send_devotional_push_notificat
 if __name__ == '__main__':
     from mocks import respuestas_mocks
 
-from upload_file_to_bucket import upload_file_to_bucket, check_file_exists
+from upload_file_to_bucket import upload_file_to_bucket, check_file_exists, delete_file_from_url
 import os
 
 
@@ -42,7 +42,7 @@ class Devocional(Resource):
                     podcast_url = upload_file_to_bucket(audio_file, 'casademipadre', 'casademipadre_bucket_podcast')
 
                     # Analyze the document and podcast
-                    analysis_result = analizar_documento(file_url, podcast_url)
+                    analysis_result = analizar_documento(file_url, podcast_url, docx_file.filename)
 
                     # Store each result
                     results.append({
@@ -56,6 +56,8 @@ class Devocional(Resource):
             else:
                 return {'message': 'An equal number of document and podcast files must be provided'}, 400
         except Exception as e:
+            delete_file_from_url(file_url,'casademipadre', 'casademipadre_bucket_devocional')
+            delete_file_from_url(podcast_url,'casademipadre', 'casademipadre_bucket_podcast')
             return {'message': 'An error occurred', 'error': str(e)}, 500
 
     

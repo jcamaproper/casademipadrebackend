@@ -9,7 +9,8 @@ from app.firebase import send_push_notifications
 
 def insertar_datos(map):
  with get_db_cursor() as cur:
-    map['fecha'] = extract_and_convert_date(map['titulo'])
+    if map.get('fecha') is None:
+        map['fecha'] = extract_and_convert_date(map['titulo'])
     
     # Check if there is an existing devocional with the same fecha
     cur.execute("SELECT COUNT(*) FROM devocionales WHERE fecha = %s", (map['fecha'],))
@@ -53,13 +54,13 @@ def insertar_datos(map):
     """)
 
     cur.execute(query, map)
-
-    map['trivia'] = json.dumps(map['trivia'])
-
-    # Después de cur.execute(query, map)
     devocional_id = cur.fetchone()[0]
-
     map['devocional_id'] = devocional_id
+
+    if map.get('trivia') is not None:
+        map['trivia'] = json.dumps(map['trivia'])
+    else:
+        map['trivia'] = '{}'
 
     if map.get('trivia') and map['trivia'] != '{}':
         trivia_query = sql.SQL("""
@@ -177,21 +178,51 @@ def extract_and_convert_date(text):
         'diciembre': 'December'
     }
 
-    # Extraer la fecha usando expresión regular
-    match = re.search(r'(\d{1,2}) de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) de (\d{4})', text)
-    if match:
-        day, month_es, year = match.groups()
+    # Obtener la fecha actual del sistema
+    today = datetime.now().date()
+    current_year = today.year
+
+    # Patrón 1: "DIA de MES de AÑO" (formato original)
+    match1 = re.search(r'(\d{1,2}) de (enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre) de (\d{4})', text, re.IGNORECASE)
+    if match1:
+        day, month_es, year = match1.groups()
         month_en = months_es_to_en[month_es.lower()]
         date_str = f'{day} {month_en} {year}'
-
-        # Convertir la cadena de fecha a un objeto datetime
         date_obj = datetime.strptime(date_str, '%d %B %Y')
+        return date_obj.date()
 
-        # date_obj es ahora un objeto datetime representando la fecha
-        return date_obj
-        #print(date_obj)
-    else:
-        return datetime.now().date()
+    # Patrón 2: "MES DIA AÑO" o "MES DIA" (nuevo formato)
+    match2 = re.search(r'(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|octubre|noviembre|diciembre)\s+(\d{1,2})(?:\s+(\d{4}))?', text, re.IGNORECASE)
+    if match2:
+        month_es, day, year = match2.groups()
+        month_en = months_es_to_en[month_es.lower()]
+        
+        # Si viene el año, usarlo
+        if year:
+            date_str = f'{day} {month_en} {year}'
+            date_obj = datetime.strptime(date_str, '%d %B %Y')
+            return date_obj.date()
+        else:
+            # Si no viene el año, calcularlo basándose en la fecha del sistema
+            # Crear una fecha con el mes y día del texto, usando el año actual
+            date_str_current_year = f'{day} {month_en} {current_year}'
+            date_obj_current_year = datetime.strptime(date_str_current_year, '%d %B %Y').date()
+            
+            # Si la fecha del texto es anterior o igual a la fecha actual, usar el año siguiente
+            # Si la fecha del texto es posterior a la fecha actual, usar el año actual
+            if date_obj_current_year <= today:
+                # La fecha ya pasó este año, usar el año siguiente
+                year_to_use = current_year + 1
+            else:
+                # La fecha aún no ha llegado este año, usar el año actual
+                year_to_use = current_year
+            
+            date_str = f'{day} {month_en} {year_to_use}'
+            date_obj = datetime.strptime(date_str, '%d %B %Y')
+            return date_obj.date()
+
+    # Si no se encuentra ningún patrón, retornar la fecha actual
+    return datetime.now().date()
 
 def insert_news(image_url, title, description):
     with get_db_cursor() as cur:
